@@ -3,6 +3,15 @@ import sys
 import webbrowser
 import glob, os
 
+# global variables
+filenames=[]
+filenum = 0
+vertices=[]
+polygoncount = 0
+vertexcount = 0
+normalscount = 0
+normal=[]
+
 sdk_manager, scene = FbxCommon.InitializeSdkObjects()
 
 path = os.getcwd()
@@ -11,7 +20,10 @@ print(newpath)
 
 os.chdir(newpath)
 for file in glob.glob("*.fbx"):
-    print(file)
+    filenames.append(file)
+
+filenum = len(filenames)
+
 
 os.chdir(path)
 
