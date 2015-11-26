@@ -24,6 +24,18 @@ for file in glob.glob("*.fbx"):
 
 filenum = len(filenames)
 
+for file in range(filenum):
+    if not FbxCommon.LoadScene(sdk_manager, scene, filenames[file]):
+        print("File not found")
+    node = scene.GetRootNode()
+    for i in range(node.GetChildCount()):
+        child = node.GetChild(i)
+        attr_type = child.GetNodeAttribute().GetAttributeType()
+
+        if attr_type==FbxCommon.FbxNodeAttribute.eMesh:
+            mesh = child.GetNodeAttribute()
+            vertices = mesh.GetControlPoints()
+
 
 os.chdir(path)
 
