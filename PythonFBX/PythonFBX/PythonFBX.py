@@ -1,4 +1,5 @@
 ﻿import FbxCommon
+import fbx
 import sys
 import webbrowser
 import glob, os
@@ -12,7 +13,9 @@ vertexcount = 0
 normalscount = 0
 normal=[]
 
+
 sdk_manager, scene = FbxCommon.InitializeSdkObjects()
+converter = fbx.FbxGeometryConverter(sdk_manager)
 
 path = os.getcwd()
 newpath=path+"\Fbx Files"
@@ -34,7 +37,12 @@ for file in range(filenum):
 
         if attr_type==FbxCommon.FbxNodeAttribute.eMesh:
             mesh = child.GetNodeAttribute()
+            triangulatedMesh = converter.Triangulate(mesh,False)
             vertices = mesh.GetControlPoints()
+            vertlen = len(vertices)
+            for i in range(vertlen):
+                vert = vertices[i]
+                
 
 
 os.chdir(path)
