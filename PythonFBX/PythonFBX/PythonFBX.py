@@ -40,6 +40,18 @@ for file in range(filenum):
             if not mesh.GetNode().GetMesh().IsTriangleMesh():
                 triangulateMesh=converter.Triangulate(mesh,False)
                 print("Triangulated")
+            textfile = open('points.txt', 'w')
+            polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
+            for i in range(polygoncount):
+                vertexcount = triangulateMesh.GetNode().GetMesh().GetPolygonSize(i)
+                for j in range(vertexcount):
+                    vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
+                    vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
+                    textfile.write(str(vertexData))
+                    textfile.write("\n")
+            textfile.close()
+
+
 
 
 os.chdir(path)
