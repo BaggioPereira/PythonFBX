@@ -1,5 +1,6 @@
 ﻿import FbxCommon
 import fbx
+import math
 import sys
 import webbrowser
 import glob, os
@@ -40,19 +41,25 @@ for file in range(filenum):
             if not mesh.GetNode().GetMesh().IsTriangleMesh():
                 triangulateMesh=converter.Triangulate(mesh,False)
                 print("Triangulated")
-            textfile = open('points.txt', 'w')
             polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
             for i in range(polygoncount):
                 vertexcount = triangulateMesh.GetNode().GetMesh().GetPolygonSize(i)
                 for j in range(vertexcount):
                     vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
                     vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
-                    textfile.write(str(vertexData))
-                    textfile.write("\n")
-            textfile.close()
-
-
-
+                    vertx = vertexData[0]
+                    verty = vertexData[1]
+                    vertz = vertexData[2]
+                    x0 = vertx
+                    x0 = vertx
+                    y0 = verty*math.cos(math.radians(45)) + vertz*math.sin(math.radians(45))
+                    z0 = vertz*math.cos(math.radians(45)) - verty*math.sin(math.radians(45))
+                    x1 = x0*math.cos(math.radians(45)) - z0*math.sin(math.radians(45))
+                    y1 = y0
+                    z1 = z0*math.cos(math.radians(45)) + x0*math.sin(math.radians(45))
+                    x2 = x1*math.cos(math.radians(0)) + y1*math.sin(math.radians(0))
+                    y2 = y1*math.cos(math.radians(0)) - x1*math.sin(math.radians(0))
+                    vertices.append([x2,y2])
 
 os.chdir(path)
 
