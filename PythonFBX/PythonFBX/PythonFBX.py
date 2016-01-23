@@ -31,74 +31,67 @@ for file in range(filenum):
     if not FbxCommon.LoadScene(sdk_manager, scene, filenames[file]):
         print("Not found")
 
+    contents = ''
     node = scene.GetRootNode()
     for i in range(node.GetChildCount()):
         child = node.GetChild(i)
         attr_type = child.GetNodeAttribute().GetAttributeType()
 
-        if attr_type==FbxCommon.FbxNodeAttribute.eMesh:
-            
+        if attr_type == FbxCommon.FbxNodeAttribute.eMesh:
             mesh = child.GetNodeAttribute()
-            if not mesh.GetNode().GetMesh().IsTriangleMesh():
-                triangulateMesh=converter.Triangulate(mesh,False)
-                print("Triangulated")
-            """textfilex = open('pointsx.txt', 'w')
-            textfiley = open('pointsy.txt', 'w')"""
-            polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
-            for i in range(polygoncount):
-                vertexcount = triangulateMesh.GetNode().GetMesh().GetPolygonSize(i)
-                vertices = []
-                for j in range(vertexcount):
-                    vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
-                    vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
-                    vertx = vertexData[0]
-                    verty = vertexData[1]
-                    vertz = vertexData[2]
-                    x0 = vertx
-                    y0 = verty*math.cos(math.radians(0)) + vertz*math.sin(math.radians(0))
-                    z0 = vertz*math.cos(math.radians(0)) - verty*math.sin(math.radians(0))
-                    x1 = x0*math.cos(math.radians(45)) - z0*math.sin(math.radians(45))
-                    y1 = y0
-                    z1 = z0*math.cos(math.radians(45)) + x0*math.sin(math.radians(45))
-                    x2 = x1*math.cos(math.radians(0)) + y1*math.sin(math.radians(0))
-                    y2 = y1*math.cos(math.radians(0)) - x1*math.sin(math.radians(0))
-                    y2 = y2 * -1
-                    vertices.append([x2,y2])
-                point1 = vertices[0][0] * 8
-                point2 = vertices[0][1] * 8
-                point3 = vertices[1][0] * 8
-                point4 = vertices[1][1] * 8
-                point5 = vertices[2][0] * 8
-                point6 = vertices[2][1] * 8
-                point1 += 250
-                point2 += 250
-                point3 += 250
-                point4 += 250
-                point5 += 250
-                point6 += 250
-                string = str(point1) + (',') + str(point2) + (' ') + str(point3) + (',') + str(point4) + (' ') + str(point5) + (',') + str(point6)
-                et.SubElement(doc, 'polyline', points = string, stroke='lightblue', fill='blue')
-                
+            contents += "edges = ["
+            edgecount = mesh.GetNode().GetMesh().GetMeshEdgeCount()
+            polygoncount = mesh.GetNode().GetMesh().GetPolygonCount()
+            for edge in range(edgecount):
+                start, end = mesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
+                contents += "[" + str(start) + "," + str(end)+"],"
+            contents = contents[:-1]+"]\n"
+            contents += "faces =["
+            for polygon in range(polygoncount):
+                contents+="["
+                for size in range(mesh.GetNode().GetMesh().GetPolygonSize(polygon)):
+                    contents += str(mesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
+                contents = contents[:-1]+"],"
+            contents = contents[:-1]+"]\n"
+            contents+="depth = ["
+            for depth in range(mesh.GetNode().GetMesh().GetPolygonCount()):
+                contents += "0,"
+            contents = contents[:-1]+"]\n"
 
-            """verticesLength = len(vertices)
-            for i in range(verticesLength):
-                point = vertices[i]
-                xpoint=point[0]
-                textfilex.write(str(xpoint))
-                textfilex.write("\n")
-            for i in range(verticesLength):
-                point = vertices[i]
-                ypoint=point[1]
-                textfiley.write(str(ypoint))
-                textfiley.write("\n")
-            textfilex.close()
-            textfiley.close()"""
+            xCoords = "x coords = ["
+            yCoords = "y coords = ["
+            zCoords = "z coords = ["
+            smallestControlPointX = 0
+            smallestControlPointY = 0
+            smallestControlPointZ = 0
+            for controlpoint in range(mesh.GetNode().GetMesh().GetControlPointsCount()):
+                if(smallestControlPointX>mesh.GetNode().GetMesh().GetControlPoints()[controlpoint][0]):
+                    smallestControlPointX=mesh.GetNode().GetMesh().GetControlPoints()[controlpoint][0]
+                    if(smallestControlPointY>mesh.GetNode().GetMesh().GetControlPoints()[controlpoint][1]):
+                        smallestControlPointY=mesh.GetNode().GetMesh().GetControlPoints()[controlpoint][1]
+                        if(smallestControlPointZ>mesh.GetNode().GetMesh().GetControlPoints()[controlpoint][2]):
+                            smallestControlPointZ=mesh.GetNode().GetMesh().GetControlPoints()[controlpoint][2]
+
+            for controlpoint in range(child.GetMesh().GetControlPointsCount()):
+                xCoords += str(child.GetMesh().GetControlPoints()[controlpoint][0] - smallestControlPointX) + ","
+                yCoords += str(child.GetMesh().GetControlPoints()[controlpoint][1] - smallestControlPointY) + ","
+                zCoords += str(child.GetMesh().GetControlPoints()[controlpoint][2] - smallestControlPointZ) + ","
+
+            xCoords = xCoords[:-1] + "];\n"
+            yCoords = yCoords[:-1] + "];\n"
+            zCoords = zCoords[:-1] + "];\n"
+
+    
 os.chdir(path)
 f = open('sample.svg', 'w')
 f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
 f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
 f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
-f.write(et.tostring(doc))
+f.write('<script type="text/ecmascript"> \n<![CDATA[\n')
+f.write(contents)
+f.write(xCoords)
+f.write(yCoords)
+f.write(zCoords)
 f.close()
 
 
@@ -114,4 +107,4 @@ message = """<html>
 f.write(message)
 f.close()
 
-webbrowser.open_new_tab('index.html')
+#webbrowser.open_new_tab('index.html')
