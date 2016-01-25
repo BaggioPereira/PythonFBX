@@ -9,10 +9,6 @@ from xml.etree import ElementTree as et
 # global variables
 filenames = []
 filenum = 0
-polygoncount = 0
-vertexcount = 0
-normalscount = 0
-normalscount=[]
 
 sdk_manager, scene = FbxCommon.InitializeSdkObjects()
 converter = fbx.FbxGeometryConverter(sdk_manager)
@@ -43,7 +39,8 @@ for file in range(filenum):
     for i in range(node.GetChildCount()):
         child = node.GetChild(i)
         attr_type = child.GetNodeAttribute().GetAttributeType()
-
+        edges = []
+        vertices = []
         if attr_type==FbxCommon.FbxNodeAttribute.eMesh:          
             mesh = child.GetNodeAttribute()
             if not mesh.GetNode().GetMesh().IsTriangleMesh():
@@ -55,23 +52,27 @@ for file in range(filenum):
             for edge in range(edgecount):
                 start, end = triangulateMesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
                 contents += "[" + str(start) + "," + str(end) + "],"
+                edges.append([start,end])
             contents = contents[:-1] +"]\n"
             contents += "faces = ["
             for polygon in range(polygoncount):
                 contents += "["
+                vertices.append([triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,0),triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,1),triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,2)])
                 for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
                     contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
                 contents = contents[:-1] +"],"
             contents = contents[:-1] + "]\n"
 
             contents += "depth =["
+            depth = []
             for polygon in range(triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
+                depth.append(0)
                 contents += "0,"
             contents = contents[:-1] + "]\n"
 
-            xPoints = "xPoints = ["
-            yPoints = "yPoints = ["
-            zPoints = "zPoints = ["
+            xPoints = "x_coords = ["
+            yPoints = "y_coords = ["
+            zPoints = "z_coords = ["
             smallestControlPointX = 0
             smallestControlPointY = 0
             smallestControlPointZ = 0
