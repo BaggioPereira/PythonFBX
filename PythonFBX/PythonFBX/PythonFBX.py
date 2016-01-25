@@ -28,7 +28,7 @@ for file in glob.glob("*.fbx"):
 filenum = len(filenames)
 doc = et.Element('svg', width='480', height='480', version='1.1', xmlns='http://www.w3.org/2000/svg', viewBox = '0,0,0,0', preserveAspectRatio = 'xMidYMid meet', onload='init(evt)'+'\n')
 script = et.SubElement(doc,'script', type='text/ecmascript')
-data = et.SubElement(doc, 'CDATA')
+data = '\n![CDATA[\n'
 doc.text=("\n")
 script.text =("\n")
 for file in range(filenum):
@@ -45,41 +45,52 @@ for file in range(filenum):
             if not mesh.GetNode().GetMesh().IsTriangleMesh():
                 triangulateMesh=converter.Triangulate(mesh,False)
                 print("Triangulated")
+            edgecount = triangulateMesh.GetNode().GetMesh().GetMeshEdgeCount()
             polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
-            for i in range(polygoncount):
-                vertexcount = triangulateMesh.GetNode().GetMesh().GetPolygonSize(i)
-                vertices = []
-                for j in range(vertexcount):
-                    vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
-                    vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
-                    vertx = vertexData[0]
-                    verty = vertexData[1]
-                    vertz = vertexData[2]
-                    x0 = vertx
-                    y0 = verty*math.cos(math.radians(0)) + vertz*math.sin(math.radians(0))
-                    z0 = vertz*math.cos(math.radians(0)) - verty*math.sin(math.radians(0))
-                    x1 = x0*math.cos(math.radians(45)) - z0*math.sin(math.radians(45))
-                    y1 = y0
-                    z1 = z0*math.cos(math.radians(45)) + x0*math.sin(math.radians(45))
-                    x2 = x1*math.cos(math.radians(0)) + y1*math.sin(math.radians(0))
-                    y2 = y1*math.cos(math.radians(0)) - x1*math.sin(math.radians(0))
-                    y2 = y2 * -1
-                    vertices.append([x2,y2])
-                point1 = vertices[0][0] * 8
-                point2 = vertices[0][1] * 8
-                point3 = vertices[1][0] * 8
-                point4 = vertices[1][1] * 8
-                point5 = vertices[2][0] * 8
-                point6 = vertices[2][1] * 8
-                point1 += 250
-                point2 += 250
-                point3 += 250
-                point4 += 250
-                point5 += 250
-                point6 += 250
-                string = str(point1) + (',') + str(point2) + (' ') + str(point3) + (',') + str(point4) + (' ') + str(point5) + (',') + str(point6)
-                polyline = et.SubElement(doc, 'polyline', points = string, stroke='lightblue', fill='blue')
-                polyline.text ="\n"
+            contents = "edges = ["
+            for edge in range(edgecount):
+                start, end = triangulateMesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
+                contents += "[" + str(start) + "," + str(end) + "],"
+            contents = contents[:-1] +"\n"
+            contents += "faces = ["
+            for polygon in range(polygoncount):
+                contents += "["
+                for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
+                    contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
+                contents = contents[:-1] +"]"
+            contents = contents[:-1] + "]\n"
+            data += contents
+            script.text = data
+                #    vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
+                #    vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
+                #    vertx = vertexData[0]
+                #    verty = vertexData[1]
+                #    vertz = vertexData[2]
+                #    x0 = vertx
+                #    y0 = verty*math.cos(math.radians(0)) + vertz*math.sin(math.radians(0))
+                #    z0 = vertz*math.cos(math.radians(0)) - verty*math.sin(math.radians(0))
+                #    x1 = x0*math.cos(math.radians(45)) - z0*math.sin(math.radians(45))
+                #    y1 = y0
+                #    z1 = z0*math.cos(math.radians(45)) + x0*math.sin(math.radians(45))
+                #    x2 = x1*math.cos(math.radians(0)) + y1*math.sin(math.radians(0))
+                #    y2 = y1*math.cos(math.radians(0)) - x1*math.sin(math.radians(0))
+                #    y2 = y2 * -1
+                #    vertices.append([x2,y2])
+                #point1 = vertices[0][0] * 8
+                #point2 = vertices[0][1] * 8
+                #point3 = vertices[1][0] * 8
+                #point4 = vertices[1][1] * 8
+                #point5 = vertices[2][0] * 8
+                #point6 = vertices[2][1] * 8
+                #point1 += 250
+                #point2 += 250
+                #point3 += 250
+                #point4 += 250
+                #point5 += 250
+                #point6 += 250
+                #string = str(point1) + (',') + str(point2) + (' ') + str(point3) + (',') + str(point4) + (' ') + str(point5) + (',') + str(point6)
+                #polyline = et.SubElement(doc, 'polyline', points = string, stroke='lightblue', fill='blue')
+                #polyline.text ="\n"
 os.chdir(path)
 f = open('sample.svg', 'w')
 f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
@@ -101,4 +112,4 @@ message = """<html>
 f.write(message)
 f.close()
 
-webbrowser.open_new_tab('index.html')
+#webbrowser.open_new_tab('index.html')
