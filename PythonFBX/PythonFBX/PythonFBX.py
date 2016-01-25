@@ -48,27 +48,27 @@ for file in range(filenum):
                 print("Triangulated")
             edgecount = triangulateMesh.GetNode().GetMesh().GetMeshEdgeCount()
             polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
-            contents = "edges = ["
+            #contents = "edges = ["
             for edge in range(edgecount):
                 start, end = triangulateMesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
-                contents += "[" + str(start) + "," + str(end) + "],"
+                #contents += "[" + str(start) + "," + str(end) + "],"
                 edges.append([start,end])
-            contents = contents[:-1] +"]\n"
-            contents += "faces = ["
+            #contents = contents[:-1] +"]\n"
+            #contents += "faces = ["
             for polygon in range(polygoncount):
-                contents += "["
+                #contents += "["
                 vertices.append([triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,0),triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,1),triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,2)])
-                for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
-                    contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
-                contents = contents[:-1] +"],"
-            contents = contents[:-1] + "]\n"
+            #    for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
+            #        contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
+            #    contents = contents[:-1] +"],"
+            #contents = contents[:-1] + "]\n"
 
-            contents += "depth =["
+            #contents += "depth =["
             depth = []
             for polygon in range(triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
                 depth.append(0)
-                contents += "0,"
-            contents = contents[:-1] + "]\n"
+            #    contents += "0,"
+            #contents = contents[:-1] + "]\n"
 
             xPoints = "x_coords = ["
             yPoints = "y_coords = ["
@@ -92,10 +92,10 @@ for file in range(filenum):
             xPoints = xPoints[:-1] +"];\n"
             yPoints = yPoints[:-1] +"];\n"
             zPoints = zPoints[:-1] +"];\n"
-            contents += xPoints + yPoints + zPoints
-            data += contents
-            data += ']]'
-            cdata = et.SubElement(script, data)
+            #contents += xPoints + yPoints + zPoints
+            #data += contents
+            #data += ']]'
+            #cdata = et.SubElement(script, data)
             for polygon in range (triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
                 poly = FbxCommon.FbxPropertyDouble3(triangulateMesh.GetNode().GetMesh().FindProperty("Color")).Get()
                 r = clamp(poly[0] * 255 - poly[0] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
