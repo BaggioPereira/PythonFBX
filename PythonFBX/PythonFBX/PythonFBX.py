@@ -23,11 +23,11 @@ for file in glob.glob("*.fbx"):
 
 filenum = len(filenames)
 doc = et.Element('svg', width='480', height='480', version='1.1', xmlns='http://www.w3.org/2000/svg', viewBox = '0,0,0,0', preserveAspectRatio = 'xMidYMid meet', onload='init(evt)'+'\n')
-script = et.SubElement(doc,'script', type='text/ecmascript')
+#script = et.SubElement(doc,'script', type='text/ecmascript')
 
-data = '![CDATA[\n'
+#data = '![CDATA[\n'
 doc.text=("\n")
-script.text =("\n")
+#script.text =("\n")
 def clamp(x): 
     return max(0, min(x, 255))
 

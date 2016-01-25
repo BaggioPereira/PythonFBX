@@ -2,8 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
 "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="480" onload="init(evt)&#10;" preserveAspectRatio="xMidYMid meet" version="1.1" viewBox="0,0,0,0" width="480" xmlns="http://www.w3.org/2000/svg">
-<script type="text/ecmascript">
-</script><path d="" fill="#cccccc" id="face-0" stroke="#cccccc">
+<path d="" fill="#cccccc" id="face-0" stroke="#cccccc">
 </path><path d="" fill="#cbcbcb" id="face-1" stroke="#cbcbcb">
 </path><path d="" fill="#cbcbcb" id="face-2" stroke="#cbcbcb">
 </path><path d="" fill="#cbcbcb" id="face-3" stroke="#cbcbcb">
