@@ -28,9 +28,13 @@ for file in glob.glob("*.fbx"):
 filenum = len(filenames)
 doc = et.Element('svg', width='480', height='480', version='1.1', xmlns='http://www.w3.org/2000/svg', viewBox = '0,0,0,0', preserveAspectRatio = 'xMidYMid meet', onload='init(evt)'+'\n')
 script = et.SubElement(doc,'script', type='text/ecmascript')
-data = '\n![CDATA[\n'
+
+data = '![CDATA[\n'
 doc.text=("\n")
 script.text =("\n")
+def clamp(x): 
+    return max(0, min(x, 255))
+
 for file in range(filenum):
     if not FbxCommon.LoadScene(sdk_manager, scene, filenames[file]):
         print("Not found")
@@ -51,16 +55,54 @@ for file in range(filenum):
             for edge in range(edgecount):
                 start, end = triangulateMesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
                 contents += "[" + str(start) + "," + str(end) + "],"
-            contents = contents[:-1] +"\n"
+            contents = contents[:-1] +"]\n"
             contents += "faces = ["
             for polygon in range(polygoncount):
                 contents += "["
                 for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
                     contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
-                contents = contents[:-1] +"]"
+                contents = contents[:-1] +"],"
             contents = contents[:-1] + "]\n"
+
+            contents += "depth =["
+            for polygon in range(triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
+                contents += "0,"
+            contents = contents[:-1] + "]\n"
+
+            xPoints = "xPoints = ["
+            yPoints = "yPoints = ["
+            zPoints = "zPoints = ["
+            smallestControlPointX = 0
+            smallestControlPointY = 0
+            smallestControlPointZ = 0
+            for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
+                if(smallestControlPointX > triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0]):
+                    smallestControlPointX = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0]
+                    if(smallestControlPointY > triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1]):
+                        smallestControlPointY = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1]
+                        if(smallestControlPointZ > triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]):
+                            smallestControlPointZ = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]
+
+            for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
+                xPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX) + ","
+                yPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY) + ","
+                zPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ) + ","
+
+            xPoints = xPoints[:-1] +"];\n"
+            yPoints = yPoints[:-1] +"];\n"
+            zPoints = zPoints[:-1] +"];\n"
+            contents += xPoints + yPoints + zPoints
             data += contents
-            script.text = data
+            data += ']]'
+            cdata = et.SubElement(script, data)
+            for polygon in range (triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
+                poly = FbxCommon.FbxPropertyDouble3(triangulateMesh.GetNode().GetMesh().FindProperty("Color")).Get()
+                r = clamp(poly[0] * 255 - poly[0] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
+                g = clamp(poly[1] * 255 - poly[1] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
+                b = clamp(poly[2] * 255 - poly[2] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
+                svgPath = et.SubElement(doc, 'path', stroke = str('#%02x%02x%02x' % (r,g,b)), fill = str('#%02x%02x%02x' % (r,g,b)), id = "face-"+str(polygon), d='')
+                svgPath.text = "\n"
+            
                 #    vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
                 #    vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
                 #    vertx = vertexData[0]
@@ -99,7 +141,15 @@ f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
 f.write(et.tostring(doc))
 f.close()
 
+r = open('sample.svg', 'r')
+filedata = r.read()
+r.close()
 
+newdata = filedata.replace("] />", "]>")
+
+f = open('sample.svg', 'w')
+f.write(newdata)
+f.close()
 
 f = open('index.html', 'w')
 message = """<html>
@@ -112,4 +162,4 @@ message = """<html>
 f.write(message)
 f.close()
 
-#webbrowser.open_new_tab('index.html')
+webbrowser.open_new_tab('index.html')
