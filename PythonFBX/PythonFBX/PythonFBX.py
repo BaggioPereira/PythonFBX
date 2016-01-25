@@ -39,7 +39,9 @@ for file in range(filenum):
     for i in range(node.GetChildCount()):
         child = node.GetChild(i)
         attr_type = child.GetNodeAttribute().GetAttributeType()
+        global edges
         edges = []
+        global vertices
         vertices = []
         if attr_type==FbxCommon.FbxNodeAttribute.eMesh:          
             mesh = child.GetNodeAttribute()
@@ -64,14 +66,18 @@ for file in range(filenum):
             #contents = contents[:-1] + "]\n"
 
             #contents += "depth =["
+            global depth
             depth = []
             for polygon in range(triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
                 depth.append(0)
             #    contents += "0,"
             #contents = contents[:-1] + "]\n"
 
+            global xPoints
             xPoints = []
+            global yPoints
             yPoints = []
+            global zPoints
             zPoints = []
             smallestControlPointX = 0
             smallestControlPointY = 0
@@ -88,6 +94,22 @@ for file in range(filenum):
                 xPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX)
                 yPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY)
                 zPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ)
+
+            global centerX
+            centerX = -smallestControlPointX
+            global centerY
+            centerY = -smallestControlPointY
+            global centerZ
+            centerZ = -smallestControlPointZ
+
+            global minX 
+            minX= -999
+            global minY 
+            minY = -999
+            global maxX
+            maxX = -999
+            global maxY
+            maxY = -999
 
             #xPoints = xPoints[:-1] +"];\n"
             #yPoints = yPoints[:-1] +"];\n"
