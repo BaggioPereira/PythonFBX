@@ -70,9 +70,9 @@ for file in range(filenum):
             #    contents += "0,"
             #contents = contents[:-1] + "]\n"
 
-            xPoints = "x_coords = ["
-            yPoints = "y_coords = ["
-            zPoints = "z_coords = ["
+            xPoints = []
+            yPoints = []
+            zPoints = []
             smallestControlPointX = 0
             smallestControlPointY = 0
             smallestControlPointZ = 0
@@ -85,14 +85,14 @@ for file in range(filenum):
                             smallestControlPointZ = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]
 
             for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
-                xPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX) + ","
-                yPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY) + ","
-                zPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ) + ","
+                xPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX)
+                yPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY)
+                zPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ)
 
-            xPoints = xPoints[:-1] +"];\n"
-            yPoints = yPoints[:-1] +"];\n"
-            zPoints = zPoints[:-1] +"];\n"
-            #contents += xPoints + yPoints + zPoints
+            #xPoints = xPoints[:-1] +"];\n"
+            #yPoints = yPoints[:-1] +"];\n"
+            #zPoints = zPoints[:-1] +"];\n"
+            #contents = xPoints + yPoints + zPoints
             #data += contents
             #data += ']]'
             #cdata = et.SubElement(script, data)
