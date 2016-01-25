@@ -26,7 +26,11 @@ for file in glob.glob("*.fbx"):
     filenames.append(file)
 
 filenum = len(filenames)
-doc = et.Element('svg', width='480', height='480', version='1.1', xmlns='http://www.w3.org/2000/svg')
+doc = et.Element('svg', width='480', height='480', version='1.1', xmlns='http://www.w3.org/2000/svg', viewBox = '0,0,0,0', preserveAspectRatio = 'xMidYMid meet', onload='init(evt)'+'\n')
+script = et.SubElement(doc,'script', type='text/ecmascript')
+data = et.SubElement(doc, 'CDATA')
+doc.text=("\n")
+script.text =("\n")
 for file in range(filenum):
     if not FbxCommon.LoadScene(sdk_manager, scene, filenames[file]):
         print("Not found")
@@ -36,14 +40,11 @@ for file in range(filenum):
         child = node.GetChild(i)
         attr_type = child.GetNodeAttribute().GetAttributeType()
 
-        if attr_type==FbxCommon.FbxNodeAttribute.eMesh:
-            
+        if attr_type==FbxCommon.FbxNodeAttribute.eMesh:          
             mesh = child.GetNodeAttribute()
             if not mesh.GetNode().GetMesh().IsTriangleMesh():
                 triangulateMesh=converter.Triangulate(mesh,False)
                 print("Triangulated")
-            """textfilex = open('pointsx.txt', 'w')
-            textfiley = open('pointsy.txt', 'w')"""
             polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
             for i in range(polygoncount):
                 vertexcount = triangulateMesh.GetNode().GetMesh().GetPolygonSize(i)
@@ -77,22 +78,8 @@ for file in range(filenum):
                 point5 += 250
                 point6 += 250
                 string = str(point1) + (',') + str(point2) + (' ') + str(point3) + (',') + str(point4) + (' ') + str(point5) + (',') + str(point6)
-                et.SubElement(doc, 'polyline', points = string, stroke='lightblue', fill='blue')
-                
-
-            """verticesLength = len(vertices)
-            for i in range(verticesLength):
-                point = vertices[i]
-                xpoint=point[0]
-                textfilex.write(str(xpoint))
-                textfilex.write("\n")
-            for i in range(verticesLength):
-                point = vertices[i]
-                ypoint=point[1]
-                textfiley.write(str(ypoint))
-                textfiley.write("\n")
-            textfilex.close()
-            textfiley.close()"""
+                polyline = et.SubElement(doc, 'polyline', points = string, stroke='lightblue', fill='blue')
+                polyline.text ="\n"
 os.chdir(path)
 f = open('sample.svg', 'w')
 f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
