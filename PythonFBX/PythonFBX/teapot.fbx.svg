@@ -28,8 +28,8 @@ function init(evt)
 	{
 		svgDocument = evt.target.ownerDocument;
 	}
-	rotateAboutZ(3.1415926);
-	rotateAboutX(3.1415926);
+	rotateAboutY(2.355);
+	rotateAboutX(-2.355);
 	calculateDepth()
 	drawBox();
 	setViewBox();
