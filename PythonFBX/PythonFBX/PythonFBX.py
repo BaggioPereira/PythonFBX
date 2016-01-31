@@ -108,7 +108,8 @@ for file in range(filenum):
             #if not mesh.GetNode().GetMesh().IsTriangleMesh():
             #    triangulateMesh=converter.Triangulate(mesh,False)
             #    print("Triangulated")
-            triangulateMesh =mesh
+            triangulateMesh = mesh
+            triangulateMesh.GetNode().GetMesh().RemoveBadPolygons()
             edgecount = triangulateMesh.GetNode().GetMesh().GetMeshEdgeCount()
             polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
             contents = "edges = ["
