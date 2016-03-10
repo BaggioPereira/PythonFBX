@@ -109,9 +109,6 @@ for file in range(len(filenames)):
         vertices = []
         if attr_type==FbxCommon.FbxNodeAttribute.eMesh:          
             mesh = child.GetNodeAttribute()
-            #if not mesh.GetNode().GetMesh().IsTriangleMesh():
-            #    triangulateMesh=converter.Triangulate(mesh,False)
-            #    print("Triangulated")
             triangulateMesh = mesh
             triangulateMesh.GetNode().GetMesh().RemoveBadPolygons()
             edgecount = triangulateMesh.GetNode().GetMesh().GetMeshEdgeCount()
@@ -120,12 +117,10 @@ for file in range(len(filenames)):
             for edge in range(edgecount):
                 start, end = triangulateMesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
                 contents += "[" + str(start) + "," + str(end) + "],"
-                #edges.append([start,end])
             contents = contents[:-1] +"]\n"
             contents += "faces = ["
             for polygon in range(polygoncount):
                 contents += "["
-                #vertices.append([triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,0),triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,1),triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,2)])
                 for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
                     contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
                 contents = contents[:-1] +"],"
@@ -134,13 +129,9 @@ for file in range(len(filenames)):
             contents += "depth =["
             depth = []
             for polygon in range(triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
-                #depth.append(0)
                 contents += "0,"
             contents = contents[:-1] + "]\n"
 
-            #xPoints = []
-            #yPoints = []
-            #zPoints = []
             xPoints = "x_coords = ["
             yPoints = "y_coords = ["
             zPoints = "z_coords = ["
@@ -167,26 +158,10 @@ for file in range(len(filenames)):
                             largestControlPointZ = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]
 
             for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
-                #xPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX)
-                #yPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY)
-                #zPoints.append(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ)
                 xPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX) + ","
                 yPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY) + ","
                 zPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ) + ","
-
-            #centerX = -smallestControlPointX
-            #centerY = -smallestControlPointY
-            #centerZ = -smallestControlPointZ
-
-            #minX = -999
-            #minY = -999
-            #maxX = -999
-            #maxY = -999
-
-            #rotateX(rotation)
-            #rotateY(rotation)
-            #rotateZ(rotation)
-            #calculatedepth()           
+                      
             xPoints = xPoints[:-1] +"];\n"
             yPoints = yPoints[:-1] +"];\n"
             zPoints = zPoints[:-1] +"];\n"
@@ -214,10 +189,6 @@ for file in range(len(filenames)):
                 r = clamp(poly[0] * 255 - poly[0] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
                 g = clamp(poly[1] * 255 - poly[1] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
                 b = clamp(poly[2] * 255 - poly[2] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
-                #thisPath = 'M'+str(xPoints[vertices[polygon][0]]*8)+' '+str(yPoints[vertices[polygon][0]]*8)
-                #for j in range(1, len(vertices[depth[polygon]])):
-                #    thisPath += ' ' + 'L'+str(xPoints[vertices[polygon][j]]*8) + ' ' + str(yPoints[vertices[polygon][j]]*8)
-                #thisPath += ' Z'
                 svgPath = et.SubElement(doc, 'path', stroke = str('#%02x%02x%02x' % (r,g,b)), fill = str('#%02x%02x%02x' % (r,g,b)), id = "face-"+str(polygon), d = '')
                 svgPath.text = "\n"
 
@@ -248,41 +219,6 @@ for file in range(len(filenames)):
             f.write(newdata)
             f.close()
     scene.UnloadContent()
-            #    vert = triangulateMesh.GetNode().GetMesh().GetPolygonVertex(i, j)
-            #    vertexData = triangulateMesh.GetNode().GetMesh().GetControlPointAt(vert)
-            #    vertx = vertexData[0]
-            #    verty = vertexData[1]
-            #    vertz = vertexData[2]
-            #    x0 = vertx
-            #    y0 = verty*math.cos(math.radians(0)) + vertz*math.sin(math.radians(0))
-            #    z0 = vertz*math.cos(math.radians(0)) - verty*math.sin(math.radians(0))
-            #    x1 = x0*math.cos(math.radians(45)) - z0*math.sin(math.radians(45))
-            #    y1 = y0
-            #    z1 = z0*math.cos(math.radians(45)) + x0*math.sin(math.radians(45))
-            #    x2 = x1*math.cos(math.radians(0)) + y1*math.sin(math.radians(0))
-            #    y2 = y1*math.cos(math.radians(0)) - x1*math.sin(math.radians(0))
-            #    y2 = y2 * -1
-            #    vertices.append([x2,y2])
-            #point1 = vertices[0][0] * 8
-            #point2 = vertices[0][1] * 8
-            #point3 = vertices[1][0] * 8
-            #point4 = vertices[1][1] * 8
-            #point5 = vertices[2][0] * 8
-            #point6 = vertices[2][1] * 8
-            #point1 += 250
-            #point2 += 250
-            #point3 += 250
-            #point4 += 250
-            #point5 += 250
-            #point6 += 250
-            #string = str(point1) + (',') + str(point2) + (' ') + str(point3) + (',') + str(point4) + (' ') + str(point5) + (',') + str(point6)
-            #polyline = et.SubElement(doc, 'polyline', points = string, stroke='lightblue', fill='blue')
-            #polyline.text ="\n"
-
-#def init():
-#    getInfo()
-
-#init()
 
 
 
@@ -302,5 +238,3 @@ message +="""</body>
 
 f.write(message)
 f.close()
-
-#webbrowser.open_new_tab('index.html')
