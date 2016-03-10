@@ -25,13 +25,12 @@ maxX = 0
 maxY = 0
 textureArray = fbx.FbxTextureArray()
 
-
-#converter = fbx.FbxGeometryConverter(sdk_manager)
-
+#Gets the path where the FBX files are
 path = os.getcwd()
 newpath=path+"\Fbx Files"
 print(newpath)
 
+#Looks for all FBX files in the path
 os.chdir(newpath)
 for file in glob.glob("*.fbx"):
     filenames.append(file)
@@ -39,68 +38,26 @@ for file in glob.glob("*.fbx"):
 print "number of files ", len(filenames)
 
 filenum = len(filenames)
+#Creates an svg element
 doc = et.Element('svg', width='480', height='480', version='1.1', xmlns='http://www.w3.org/2000/svg', viewBox = '0,0,0,0', preserveAspectRatio = 'xMidYMid meet', onload='init(evt)')
 script = et.SubElement(doc,'script', type='text/ecmascript')
 data = '![CDATA[\n'
 doc.text=("\n")
-#script.text =("\n")
+
 def clamp(x): 
     return max(0, min(x, 255))
 
-#def calculatedepth():
-#    facesDepth = len(vertices)
-#    for i in range(facesDepth):
-#        currentDepth = 0
-#        for j in range(len(vertices[i])):
-#            currentDepth += zPoints[vertices[i][j]]
-#        currentDepth /= len(vertices[i])
-#        facesDepth[i] = currentDepth
-
-#    for i in range(len(depth)):
-#        smallest = -1
-#        for j in range(facesDepth):
-#            if facesDepth[j] != -99999 and (smallest ==-1 or facesDepth[smallest] > facesDepth[j]):
-#                smallest = j
-#        depth[i] = smallest
-#        facesDepth[smallest] = -99999
-
-#def rotateX(rads):
-#    for i in range(len(xPoints)):
-#        y = yPoints[i] - centerY
-#        z = zPoints[i] - centerZ
-#        d = math.sqrt(y*y + z*z)
-#        theta = math.atan2(y,z) + rads
-#        yPoints[i] = centerY + d + math.sin(theta)
-#        zPoints[i] = centerZ + d + math.sin(theta)
-
-#def rotateY(rads):
-#    for i in range(len(xPoints)):
-#        x = xPoints[i] - centerX
-#        z = zPoints[i] - centerZ
-#        d = math.sqrt(x*x + z*z)
-#        theta = math.atan2(x,z) + rads
-#        xPoints[i] = centerX + d + math.sin(theta)
-#        zPoints[i] = centerZ + d + math.sin(theta)
-
-#def rotateZ(rads):
-#    for i in range(len(xPoints)):
-#        y = yPoints[i] - centerY
-#        x = zPoints[i] - centerX
-#        d = math.sqrt(x*x + y*y)
-#        theta = math.atan2(x,y) + rads
-#        yPoints[i] = centerY + d + math.sin(theta)
-#        xPoints[i] = centerX + d + math.sin(theta)
-
-
+#Load a file from the list of FBX files
 for file in range(len(filenames)):
     sdk_manager, scene = FbxCommon.InitializeSdkObjects()
-    if not FbxCommon.LoadScene(sdk_manager, scene, filenames[file]):
+    if not FbxCommon.LoadScene(sdk_manager, scene, filenames[file]): 
         print str(filenames[file])
-        print("Not found")
+        print("Not found")      #print if unable to find/load
 
     rotation =  180
     rotation = rotation * 3.1415926 / 180
 
+    #Get the root node of the file
     node = scene.GetRootNode()
     for i in range(node.GetChildCount()):
         child = node.GetChild(i)
@@ -109,58 +66,54 @@ for file in range(len(filenames)):
         vertices = []
         if attr_type==FbxCommon.FbxNodeAttribute.eMesh:          
             mesh = child.GetNodeAttribute()
-            triangulateMesh = mesh
-            triangulateMesh.GetNode().GetMesh().RemoveBadPolygons()
-            edgecount = triangulateMesh.GetNode().GetMesh().GetMeshEdgeCount()
-            polygoncount = triangulateMesh.GetNode().GetMesh().GetPolygonCount()
+            mesh.GetNode().GetMesh().RemoveBadPolygons()
+            #Get the edge count
+            edgecount = mesh.GetNode().GetMesh().GetMeshEdgeCount()
+            #Get the polygon count
+            polygoncount = mesh.GetNode().GetMesh().GetPolygonCount()
+            #Make a list of all edges in a string
             contents = "edges = ["
             for edge in range(edgecount):
-                start, end = triangulateMesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
+                start, end = mesh.GetNode().GetMesh().GetMeshEdgeVertices(edge)
                 contents += "[" + str(start) + "," + str(end) + "],"
             contents = contents[:-1] +"]\n"
+            #Make a list of all faces in a string
             contents += "faces = ["
             for polygon in range(polygoncount):
                 contents += "["
-                for size in range(triangulateMesh.GetNode().GetMesh().GetPolygonSize(polygon)):
-                    contents +=str(triangulateMesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
+                for size in range(mesh.GetNode().GetMesh().GetPolygonSize(polygon)):
+                    contents +=str(mesh.GetNode().GetMesh().GetPolygonVertex(polygon,size))+","
                 contents = contents[:-1] +"],"
             contents = contents[:-1] + "]\n"
-
+            #Make a list of all depths
             contents += "depth =["
             depth = []
-            for polygon in range(triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
+            for polygon in range(mesh.GetNode().GetMesh().GetPolygonCount()):
                 contents += "0,"
             contents = contents[:-1] + "]\n"
 
+            #Get all x, y and z 3D coordinates
             xPoints = "x_coords = ["
             yPoints = "y_coords = ["
             zPoints = "z_coords = ["
             smallestControlPointX = 0
             smallestControlPointY = 0
             smallestControlPointZ = 0
-            largestControlPointX = 0
-            largestControlPointY = 0
-            largestControlPointZ = 0
-            for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
-                if(smallestControlPointX > triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0]):
-                    smallestControlPointX = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0]
-                    if(smallestControlPointY > triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1]):
-                        smallestControlPointY = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1]
-                        if(smallestControlPointZ > triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]):
-                            smallestControlPointZ = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]
 
-            for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
-                if(largestControlPointX < triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0]):
-                    largestControlPointX = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0]
-                    if(largestControlPointY < triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1]):
-                        largestControlPointY = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1]
-                        if(largestControlPointZ < triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]):
-                            largestControlPointZ = triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2]
+            #Set smallest control points
+            for point in range(mesh.GetNode().GetMesh().GetControlPointsCount()):
+                if(smallestControlPointX > mesh.GetNode().GetMesh().GetControlPoints()[point][0]):
+                    smallestControlPointX = mesh.GetNode().GetMesh().GetControlPoints()[point][0]
+                    if(smallestControlPointY > mesh.GetNode().GetMesh().GetControlPoints()[point][1]):
+                        smallestControlPointY = mesh.GetNode().GetMesh().GetControlPoints()[point][1]
+                        if(smallestControlPointZ > mesh.GetNode().GetMesh().GetControlPoints()[point][2]):
+                            smallestControlPointZ = mesh.GetNode().GetMesh().GetControlPoints()[point][2]
 
-            for point in range(triangulateMesh.GetNode().GetMesh().GetControlPointsCount()):
-                xPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX) + ","
-                yPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY) + ","
-                zPoints += str(triangulateMesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ) + ","
+            #Add to list for x, y and z coords
+            for point in range(mesh.GetNode().GetMesh().GetControlPointsCount()):
+                xPoints += str(mesh.GetNode().GetMesh().GetControlPoints()[point][0] - smallestControlPointX) + ","
+                yPoints += str(mesh.GetNode().GetMesh().GetControlPoints()[point][1] - smallestControlPointY) + ","
+                zPoints += str(mesh.GetNode().GetMesh().GetControlPoints()[point][2] - smallestControlPointZ) + ","
                       
             xPoints = xPoints[:-1] +"];\n"
             yPoints = yPoints[:-1] +"];\n"
@@ -168,7 +121,7 @@ for file in range(len(filenames)):
             contents += xPoints + yPoints + zPoints
             data += contents
             
-            
+            #Functions
             data += "\n\ncentre_x = "+str(-smallestControlPointX)+";\ncentre_y = "+str(-smallestControlPointY)+";\ncentre_z = "+str(-smallestControlPointZ)+";\n\n\n\n\tvar minX = -999;\n\tvar minY = -999;\n\tvar maxX = -999;\n\tvar maxY = -999;\n\n"
             data += "function init(evt)\n{\n\tif ( window.svgDocument == null )\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\trotateAboutY("+str((135*3.14/180))+");\n\trotateAboutX("+str(-(135*3.14/180))+");\n\tcalculateDepth()\n\tdrawBox();\n\tsetViewBox();\nif(minX < 0 || minY < 0)\n{\n\tfixCoords();\n\tdrawBox();\n\tsetViewBox();\n}}"
 
@@ -184,23 +137,17 @@ for file in range(len(filenames)):
 
             data += "\n]]"
             cdata = et.SubElement(script, data)
-            for polygon in range (triangulateMesh.GetNode().GetMesh().GetPolygonCount()):
-                poly = FbxCommon.FbxPropertyDouble3(triangulateMesh.GetNode().GetMesh().FindProperty("Color")).Get()
+
+            #Get the colour for each polygon
+            for polygon in range (mesh.GetNode().GetMesh().GetPolygonCount()):
+                poly = FbxCommon.FbxPropertyDouble3(mesh.GetNode().GetMesh().FindProperty("Color")).Get()
                 r = clamp(poly[0] * 255 - poly[0] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
                 g = clamp(poly[1] * 255 - poly[1] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
                 b = clamp(poly[2] * 255 - poly[2] * 0.4 * ((polygon+0.0) / child.GetMesh().GetPolygonCount()) * 255)
                 svgPath = et.SubElement(doc, 'path', stroke = str('#%02x%02x%02x' % (r,g,b)), fill = str('#%02x%02x%02x' % (r,g,b)), id = "face-"+str(polygon), d = '')
                 svgPath.text = "\n"
 
-            scene.FillTextureArray(textureArray)
-            for i in range(0, textureArray.GetCount()):
-                texture = textureArray.GetAt(i)
-                if texture.ClassId == fbx.FbxFileTexture.ClassId:
-                    textureFilename = texture.GetFileName()
-                    image = Image.open(textureFilename)
-                    width, height = image.size
-                    print("%sx%s = %s" % (width, height, textureFilename))
-
+            #Create an svg file and store all the data
             os.chdir(path)
             f = open(str(filenames[file]) + '.svg', 'w')
             f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
@@ -209,6 +156,7 @@ for file in range(len(filenames)):
             f.write(et.tostring(doc))
             f.close()
 
+            #Cleanup the svg file
             r = open(str(filenames[file]) + '.svg', 'r')
             filedata = r.read()
             r.close()
@@ -218,11 +166,10 @@ for file in range(len(filenames)):
             f = open(str(filenames[file]) + '.svg', 'w')
             f.write(newdata)
             f.close()
-    scene.UnloadContent()
 
 
 
-
+#Update the index.html
 f = open('index.html', 'w')
 message = """<html>
 
