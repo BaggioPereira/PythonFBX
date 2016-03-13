@@ -3,7 +3,7 @@
 
 In this project we were assigned to try and use the coding language python to load up a web server and use it to convert and display an FBX image on the web server site. 
 In this project we were in a group of three, Michael Craddock, Baggio Pereira and Eleni Paskali. To begin this project the first thing we looked up was setting up a server. We initially looked at using something along the lines of Amazon or google to host the service but we ended up choosing to host it locally so that we didn’t have to spend money on hosting costs and due to time constraints we never managed to switch over to using a proper online server.
-Some initial testing was done early on trying to connect to Amazons service however at the time it proved tricky and to get the project moving we switched over to using a local hosted server so we could get something down.
+Some initial testing was done early on trying to connect to Amazons service however at the time it proved tricky and to get the project moving we switched over to using a local hosted server so we could get something down. The server script does two assignments. The first is to host the directory, and the other is to run the main script (PythonFBX) which then creates the SVG file used and updates the HTML.
 After creating a blank local hosted web page we began to work on creating different types of FBX models to try and convert and upload to the page itself. To start with we used a tea pot model to try and upload as it has quite a few distinct features to show and to recreate as well.
 To begin with we start by setting all the global variables such as the file names, numbers, edges, depth etc. 
  
@@ -134,6 +134,6 @@ Once all of this has been done we then create the SVG file and then store all th
             f.write(newdata)
             f.close()
 
-Once all of this has been done, stored and cleaned up, we then update the index HTML we created earlier to display the SVG file on the HTML page.
+Once all of this has been done, stored and cleaned up, we then update the HTML page to have the new names of the SVG file that was created. When the index.HTML page is being loaded it calls on the SVG file and then when that happens the SVG file runs its own script in its file to generate the image on the webpage.
 To get all of this to display onto the HTML page we run the pythonFBX script in the server script, this’ll then get all the information and the final SVG file and display it on the page.
-If we were to attempt this project again we’d try harder to try and get a non-local hosted server working via something like amazon or google and try and display it properly on an online server. Another possible thing we could look into adding further would be animated models and getting the SVG to display the animation of the model once loaded on the site. 
+If we were to attempt this project again we’d try harder to try and get a non-local hosted server working via something like amazon or google and try and display it properly on an online server. Another possible thing we could look into adding further would be animated models and getting the SVG to display the animation of the model once loaded on the site.
