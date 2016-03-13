@@ -24,13 +24,12 @@ maxX = 0
 maxY = 0
 textureArray = fbx.FbxTextureArray()
 
- After we’d done this we had to then find the path to the FBX files and once the location had be found have the script look for the all the FBX folders in the path. 
+After we’d done this we had to then find the path to the FBX files and once the location had be found have the script look for the all the FBX folders in the path. 
 
 path = os.getcwd()
 newpath=path+"\Fbx Files"
 print(newpath)
 
-#Looks for all FBX files in the path
 os.chdir(newpath)
 for file in glob.glob("*.fbx"):
     filenames.append(file)
